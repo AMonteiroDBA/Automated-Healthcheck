@@ -5,18 +5,18 @@
 export yesterday=`date --date="-1 day"`
 export ORACLE_SID=PROD1
 export ORACLE_HOME=/u01/PROD/oracle/db/tech_st/11.2.0.4/db_1
-export PATH=$PATH:$ORACLE_HOME/bin
-LOG=/home/oracle/scripts/Healthcheck/healthcheck_mail_`date +\%d\%b\%y`.html
-echo "<html>" > $LOG
-echo "<BODY LANG="en-US" DIR="LTR">" >> $LOG
+export PATH=${PATH}:${ORACLE_HOME}/bin
+SISDBA_HOME="${HOME}/kyndba/alkdba";
+LOG=${SISDBA_HOME}/Healthcheck/healthcheck_mail_`date +\%d\%b\%y`.html
+echo "<html>" > ${LOG}
+echo "<BODY LANG="en-US" DIR="LTR">" >> ${LOG}
 
-rm $LOG
+rm ${LOG}
 
-echo "<h3 ALIGN=CENTER > PROD HEALTHCHECK REPORT ON `date`    </h3>" >>$LOG
+echo "<h3 ALIGN=CENTER > PROD HEALTHCHECK REPORT ON `date`    </h3>" >>${LOG}
 
-
-echo "<table WIDTH=100% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>" >>$LOG
-echo "<tr><td bgcolor=#ADD8E6><b>HEALTH CHECK ITEMS</b></td><td bgcolor=#ADD8E6><b>Check the corresponding output below</b></td><td bgcolor=#ADD8E6><b>COMMENTS</b></td></tr>" >> $LOG
+echo "<table WIDTH=100% BORDER=1 BORDERCOLOR="#000000" CELLPADDING=4 CELLSPACING=0>" >>${LOG}
+echo "<tr><td bgcolor=#ADD8E6><b>HEALTH CHECK ITEMS</b></td><td bgcolor=#ADD8E6><b>Check the corresponding output below</b></td><td bgcolor=#ADD8E6><b>COMMENTS</b></td></tr>" >> ${LOG}
 
 ############################################## CHECK DATABASE IS UP AND RUNNING #################################################################################
 PROD_DB_STATUS=`ps -ef|grep pmon|grep "PROD1"|wc -l`
@@ -66,18 +66,17 @@ select name,open_mode,log_mode,DATABASE_ROLE from v\$database;
 exit
 EOF
 
-
 ############################################## TABLESPCAE CHECK ##################################################################################################
 echo "<h3 ALIGN=LEFT >   TABLESPACE CHECK   </h3>" >> $LOG
 sqlplus -S -M "HTML ON TABLE 'BORDER="2"'" / as sysdba << EOF  >>$LOG
-@/home/oracle/scripts/Healthcheck/autofree.sql
+@${SISDBA_HOME}/Healthcheck/autofree.sql
 exit
 EOF
 
 ############################################# TEMP TABLESPACE ################################################################
 echo "<h3 ALIGN=LEFT >   TEMP TABLESPACE CHECK   </h3>" >> $LOG
 sqlplus -S -M "HTML ON TABLE 'BORDER="2"'" / as sysdba << EOF  >>$LOG
-@/home/oracle/scripts/Healthcheck/temp_tbs.sql
+@${SISDBA_HOME}/Healthcheck/temp_tbs.sql
 exit
 EOF
 
@@ -100,29 +99,28 @@ EOF
 ############################################# CHECK CONCURRENT MANAGER STATUS  ################################################################
 echo "<h3 ALIGN=LEFT >   CONCURRENT MANAGER STATUS   </h3>" >> $LOG
 sqlplus -S -M "HTML ON TABLE 'BORDER="2"'" / as sysdba << EOF  >>$LOG
-@/home/oracle/scripts/Healthcheck/cm_status.sql
+@${SISDBA_HOME}/Healthcheck/cm_status.sql
 exit
 EOF
 
 ############################################# CHECK Periodic Alert Scheduler Request Status  ################################################################
 echo "<h3 ALIGN=LEFT >   Periodic Alert Scheduler Request last Run   </h3>" >> $LOG
 sqlplus -S -M "HTML ON TABLE 'BORDER="2"'" / as sysdba << EOF  >>$LOG
-@/home/oracle/scripts/Healthcheck/Periodic_Alert_Check.sql
+@${SISDBA_HOME}/Healthcheck/Periodic_Alert_Check.sql
 exit
 EOF
 
 ############################################# CHECK CONCURRENT REQUEST STATUS  ################################################################
 echo "<h3 ALIGN=LEFT >   CONCURRENT JOBS RUNNING NOW   </h3>" >> $LOG
 sqlplus -S -M "HTML ON TABLE 'BORDER="2"'" / as sysdba << EOF  >>$LOG
-@/home/oracle/scripts/Healthcheck/cmrun.sql
+@${SISDBA_HOME}/Healthcheck/cmrun.sql
 exit
 EOF
 
-
-chmod 777 /home/oracle/scripts/Healthcheck/healthcheck_mail*
+chmod 777 ${SISDBA_HOME}/Healthcheck/healthcheck_mail*
 
 export MAILTO="emailaddress@domain"
-export CONTENT="/home/oracle/scripts/Healthcheck/healthcheck_mail_`date +\%d\%b\%y`.html"
+export CONTENT="${SISDBA_HOME}/Healthcheck/healthcheck_mail_`date +\%d\%b\%y`.html"
 export SUBJECT="PROD HEALTHCHECK REPORT ON `date`  "
 (
  echo "Subject: $SUBJECT"
